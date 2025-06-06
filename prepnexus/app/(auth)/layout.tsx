@@ -1,8 +1,8 @@
-import React from "react";
+import {ReactNode}from "react";
 
-const AuthLayout = ()=>{
+const AuthLayout = ({children}:{children:ReactNode})=>{
 return(
-  <div>Layout</div>
+  <div className="auth-layout">{children}</div>
 )
 }
 
