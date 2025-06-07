@@ -67,7 +67,7 @@ const AuthForm = ({ type }: { type: FormType }) => {
         toast.success('Account created successfully. Please sign in.');
         router.push('/sign-in');
       } else {
-        const { email, password } = data;
+        const { email, password } = values;
 
         const userCredential = await signInWithEmailAndPassword(
           auth,
@@ -77,14 +77,14 @@ const AuthForm = ({ type }: { type: FormType }) => {
 
         const idToken = await userCredential.user.getIdToken();
         if (!idToken) {
-          toast.error("Sign in Failed. Please try again.");
+          toast.error('Sign in Failed. Please try again.');
           return;
         }
 
         await signIn({
           email,
           idToken,
-        });
+        })
 
         toast.success('Signed in successfully.');
         router.push('/');
