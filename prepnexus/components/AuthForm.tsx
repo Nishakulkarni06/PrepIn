@@ -41,31 +41,31 @@ const AuthForm = ({ type }: { type: FormType }) => {
     },
   });
 
-  const onSubmit = async (data: z.infer<typeof formSchema>) => {
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      if (type === "sign-up") {
-        const { name, email, password } = data;
+      if (type === 'sign-up') {
+        const { name, email, password } = values;
 
-        const userCredential = await createUserWithEmailAndPassword(
+        const userCredentials = await createUserWithEmailAndPassword(
           auth,
           email,
           password
         );
 
         const result = await signUp({
-          uid: userCredential.user.uid,
+          uid: userCredentials.user.uid,
           name: name!,
           email,
           password,
-        });
+        })
 
-        if (!result.success) {
-          toast.error(result.message);
+        if (!result?.success) {
+          toast.error(result?.message);
           return;
         }
 
-        toast.success("Account created successfully. Please sign in.");
-        router.push("/sign-in");
+        toast.success('Account created successfully. Please sign in.');
+        router.push('/sign-in');
       } else {
         const { email, password } = data;
 
@@ -86,8 +86,8 @@ const AuthForm = ({ type }: { type: FormType }) => {
           idToken,
         });
 
-        toast.success("Signed in successfully.");
-        router.push("/");
+        toast.success('Signed in successfully.');
+        router.push('/');
       }
     } catch (error) {
       console.log(error);
