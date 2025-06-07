@@ -101,7 +101,7 @@ export async function signOut() {
 export async function getCurrentUser(): Promise<User | null> {
   const cookieStore = await cookies();
 
-  const sessionCookie = cookieStore.get("session")?.value;
+  const sessionCookie = cookieStore.get('session')?.value;
   if (!sessionCookie) return null;
 
   try {
@@ -109,7 +109,7 @@ export async function getCurrentUser(): Promise<User | null> {
 
     // get user info from db
     const userRecord = await db
-      .collection("users")
+      .collection('users')
       .doc(decodedClaims.uid)
       .get();
     if (!userRecord.exists) return null;
@@ -118,8 +118,8 @@ export async function getCurrentUser(): Promise<User | null> {
       ...userRecord.data(),
       id: userRecord.id,
     } as User;
-  } catch (error) {
-    console.log(error);
+  } catch (e) {
+    console.log(e);
 
     // Invalid or expired session
     return null;
