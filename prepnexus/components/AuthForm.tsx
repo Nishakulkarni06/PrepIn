@@ -4,7 +4,7 @@ import { z } from "zod";
 import Link from "next/link";
 import Image from "next/image";
 import { toast } from "sonner";
-//import { auth } from "@/firebase/client";
+import { auth } from "@/firebase/client";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -12,12 +12,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
- }from "firebase/auth";
+} from "firebase/auth";
 
 import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 
-//import { signIn, signUp } from "@/lib/actions/auth.action";
+import { signIn, signUp } from "@/lib/actions/auth.action";
 import FormField from "./FormField";
 
 const authFormSchema = (type: FormType) => {
@@ -41,33 +41,33 @@ const AuthForm = ({ type }: { type: FormType }) => {
     },
   });
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  const onSubmit = async (data: z.infer<typeof formSchema>) => {
     try {
-      if (type === 'sign-up') {
-        const { name, email, password } = values;
+      if (type === "sign-up") {
+        const { name, email, password } = data;
 
-        const userCredentials = await createUserWithEmailAndPassword(
+        const userCredential = await createUserWithEmailAndPassword(
           auth,
           email,
           password
         );
 
         const result = await signUp({
-          uid: userCredentials.user.uid,
+          uid: userCredential.user.uid,
           name: name!,
           email,
           password,
-        })
+        });
 
-        if (!result?.success) {
-          toast.error(result?.message);
+        if (!result.success) {
+          toast.error(result.message);
           return;
         }
 
-        toast.success('Account created successfully. Please sign in.');
-        router.push('/sign-in');
+        toast.success("Account created successfully. Please sign in.");
+        router.push("/sign-in");
       } else {
-        const { email, password } = values;
+        const { email, password } = data;
 
         const userCredential = await signInWithEmailAndPassword(
           auth,
@@ -77,17 +77,17 @@ const AuthForm = ({ type }: { type: FormType }) => {
 
         const idToken = await userCredential.user.getIdToken();
         if (!idToken) {
-          toast.error('Sign in Failed. Please try again.');
+          toast.error("Sign in Failed. Please try again.");
           return;
         }
 
         await signIn({
           email,
           idToken,
-        })
+        });
 
-        toast.success('Signed in successfully.');
-        router.push('/');
+        toast.success("Signed in successfully.");
+        router.push("/");
       }
     } catch (error) {
       console.log(error);
