@@ -29,10 +29,12 @@ export async function POST(request: Request) {
         })
 
         const interview = {
-            role,type,level,
+            role: role,
+            type: type,
+            level: level,
             techstack: techstack.split(','),
             questions: JSON.parse(questions),
-            userid: userid,
+            userId: userid,
             finalized: true,
             coverImage: getRandomInterviewCover(),
             createdAt: new Date().toISOString(),
@@ -43,7 +45,7 @@ export async function POST(request: Request) {
         return Response.json({ success: true}, { status: 200 });
     }
     catch (error){
-        console.error(error);
-        return Response.json({ success: false, error }, { status: 500 });
+        console.error("Error:",error);
+        return Response.json({ success: false, error: error }, { status: 500 });
     }
 }
