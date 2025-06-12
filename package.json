@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "@ai-sdk/google": "^1.2.19",
+    "ai": "^4.3.16",
+    "firebase": "^11.9.0",
+    "firebase-admin": "^13.4.0"
+  }
+}
