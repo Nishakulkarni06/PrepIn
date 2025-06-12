@@ -100,47 +100,6 @@ const Agent=({
     }
   }, [messages, callStatus, feedbackId, interviewId, router, type, userId]);
 
-  // const handleCall = async () => {
-  //   setCallStatus(CallStatus.CONNECTING);
-
-  //   if (type === 'generate') {
-  //     await vapi.start(
-  //       undefined,
-  //       // undefined,
-  //       // undefined,
-  //       // process.env.NEXT_PUBLIC_VAPI_WORKFLOW_ID!,
-  //       generator,
-  //       {
-  //         variableValues: {
-  //           username: userName,
-  //           userid: userId,
-  //         },
-  //         clientMessages:["transcript"],
-  //         serverMessages: [],
-  //         // clientMessages: "transcript",
-  //         // serverMessages: undefined,
-  //       },
-  //       undefined
-  //       // generator
-  //     );
-  //   }
-  //   else{
-  //     let formaattedQuestions = "";
-  //     if (questions) {
-  //       formaattedQuestions = questions.map((q: string) => `- ${q}`).join('\n');
-  //     }
-
-  //     await vapi.start(interviewer,{
-  //       variableValues: {
-  //         questions: formaattedQuestions,
-  //       },
-  //       clientMessages: ["transcript"],
-  //       serverMessages: [],
-  //       // clientMessages: "transcript",
-  //       // serverMessages: undefined,
-  //     });
-  //   }
-  // };
   const handleCall = async () => {
     setCallStatus(CallStatus.CONNECTING);
 
