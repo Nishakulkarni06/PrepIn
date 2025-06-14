@@ -92,6 +92,26 @@ const Feedback = async ({ params }: RouteParams) => {
         </ul>
       </div>
 
+      {feedback?.resources?.length > 0 && (
+        <div className="flex flex-col gap-3">
+          <h3>Suggested Resources</h3>
+          <ul className="list-disc list-inside">
+            {feedback.resources.map((resource, index) => (
+              <li key={index}>
+                <a
+                  href={resource.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 hover:underline"
+                >
+                  {resource.title}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
       <div className="buttons">
         <Button className="btn-secondary flex-1">
           <Link href="/" className="flex w-full justify-center">

@@ -4,6 +4,7 @@ import { generateObject } from "ai";
 import { google } from "@ai-sdk/google";
 import { feedbackSchema } from "@/constants";
 import { db } from "@/firebase/admin";
+import { fetchYouTubeResources } from "@/lib/utils";
 
 
 export async function createFeedback(params: CreateFeedbackParams) {
@@ -34,10 +35,24 @@ export async function createFeedback(params: CreateFeedbackParams) {
         - **Problem-Solving**: Ability to analyze problems and propose solutions.
         - **Cultural & Role Fit**: Alignment with company values and job role.
         - **Confidence & Clarity**: Confidence in responses, engagement, and clarity.
+
+        At the end of your evaluation, provide:
+        1. A list of specific technical topics the candidate needs to improve on (e.g., "binary search", "SQL joins"). 
+        - Only output an array of strings like this:
+        ["React Lifecycle Methods", "State vs Props", "REST APIs"]
         `,
       system:
         "You are a professional interviewer analyzing a mock interview. Your task is to evaluate the candidate based on structured categories",
     });
+
+    const topicsToImprove = object.topicsNeedingImprovement || [];
+
+    const resourcePromises = topicsToImprove.map((topic: string) =>
+      fetchYouTubeResources(topic, 1)
+    );
+    const videoResults = await Promise.all(resourcePromises);
+
+    const resources = videoResults.flat().slice(0, 5);
 
     const feedback = {
       interviewId: interviewId,
@@ -47,6 +62,7 @@ export async function createFeedback(params: CreateFeedbackParams) {
       strengths: object.strengths,
       areasForImprovement: object.areasForImprovement,
       finalAssessment: object.finalAssessment,
+      resources: resources,
       createdAt: new Date().toISOString(),
     };
 
