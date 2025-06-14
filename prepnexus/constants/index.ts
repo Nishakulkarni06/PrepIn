@@ -186,6 +186,11 @@ export const feedbackSchema = z.object({
   ]),
   strengths: z.array(z.string()),
   areasForImprovement: z.array(z.string()),
+  topicsNeedingImprovement: z.array(z.string()),
+  resources: z.array(z.object({
+    title: z.string(),
+    link: z.string().url(),
+    description: z.string()})),
   finalAssessment: z.string(),
 });
 

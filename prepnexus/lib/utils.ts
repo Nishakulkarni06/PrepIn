@@ -45,3 +45,29 @@ export const getRandomInterviewCover = () => {
   const randomIndex = Math.floor(Math.random() * interviewCovers.length);
   return `/covers${interviewCovers[randomIndex]}`;
 };
+
+const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY!;
+
+export async function fetchYouTubeResources(query: string, maxResults = 3) {
+  const baseUrl = "https://www.googleapis.com/youtube/v3/search";
+
+  const params = new URLSearchParams({
+    part: "snippet",
+    q: query,
+    key: YOUTUBE_API_KEY,
+    maxResults: maxResults.toString(),
+    type: "video",
+    safeSearch: "strict",
+  });
+
+  const res = await fetch(`${baseUrl}?${params}`);
+  const data = await res.json();
+
+  if (!data.items) return [];
+
+  return data.items.map((item: any) => ({
+    title: item.snippet.title,
+    link: `https://www.youtube.com/watch?v=${item.id.videoId}`,
+    description: item.snippet.description,
+  }));
+}

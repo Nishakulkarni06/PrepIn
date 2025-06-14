@@ -8,12 +8,13 @@ export async function GET(){
 }
 
 export async function POST(request: Request) {
-    const { type, role, level, techstack, amount, userid } = await request.json();
+    const { type, role, level, techstack, amount, userid, company } = await request.json();
 
     try{
         const { text: questions } = await generateText({
             model: google('gemini-2.0-flash-001'),
             prompt:`Prepare questions for a job interview.
+        Most likely to be asked in the company ${company}.
         The job role is ${role}.
         The job experience level is ${level}.
         The tech stack used in the job is: ${techstack}.
@@ -29,6 +30,7 @@ export async function POST(request: Request) {
         })
 
         const interview = {
+            comapny: company,
             role: role,
             type: type,
             level: level,
