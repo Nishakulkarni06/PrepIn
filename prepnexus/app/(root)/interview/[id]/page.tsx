@@ -2,7 +2,7 @@ import Image from "next/image";
 import { redirect } from "next/navigation";
 
 import Agent from "@/components/Agent";
-import { getRandomInterviewCover } from "@/lib/utils";
+import { getCompanyLogo } from "@/lib/utils";
 import {
   getFeedbackByInterviewId,
   getInterviewById,
@@ -24,24 +24,24 @@ const InterviewDetails = async ({ params }: RouteParams) => {
   });
 
   return (
-    <>
+    <div className="flex flex-col bg-white gap-8 p-8 rounded-lg shadow-md">
       <div className="flex flex-row gap-4 justify-between">
         <div className="flex flex-row gap-4 items-center max-sm:flex-col">
           <div className="flex flex-row gap-4 items-center">
             <Image
-              src={getRandomInterviewCover()}
+              src={getCompanyLogo(interview.company)}
               alt="cover-image"
               width={40}
               height={40}
               className="rounded-full object-cover size-[40px]"
             />
-            <h3 className="capitalize">{interview.role} Interview</h3>
+            <h3 className="capitalize text-black font-sans">{interview.role} Interview</h3>
           </div>
 
           <DisplayTechIcons techStack={interview.techstack} />
         </div>
 
-        <p className="bg-dark-200 px-4 py-2 rounded-lg h-fit">
+        <p className="bg-[#EDECEC] text-black text-bold px-4 py-2 rounded-md h-fit">
           {interview.type}
         </p>
       </div>
@@ -54,7 +54,7 @@ const InterviewDetails = async ({ params }: RouteParams) => {
         questions={interview.questions}
         feedbackId={feedback?.id}
       />
-    </>
+    </div>
   );
 };
 
