@@ -141,17 +141,17 @@ const Agent=({
   return(
     <>
     <div className="call-view">
-      <div className="card-interviewer">
+      <div className="card-interviewer bg-dark-200 rounded-sm">
         <div className="avatar">
            <Image src="/ai-avatar.png" alt="vapi" width={65} height={54} className="object-cover" />
            {isSpeaking && <span className="animate-speak"/>}
         </div>
-        <h3>AI Interviewer</h3>
+        <h3 className="text-white">AI Interviewer</h3>
       </div>
-      <div className="card-border">
+      <div className="card-border rounded-sm">
         <div className="card-content">
           <Image src="/user-avatar.png" alt="user avatar" width={540} height={540} className="rounded-full object-cover size-[120px]" />
-           <h3>{userName}</h3>
+           <h3 className="text-white">{userName}</h3>
         </div> 
 
       </div>
@@ -159,7 +159,7 @@ const Agent=({
       {messages.length>0 && (
         <div className="transcript-border">
           <div className="transcript">
-            <p key={lastMessage} className={cn('transition-opacity duration-500 opacity-0', 'animate-fadeIn opacity-100')}>
+            <p key={lastMessage} className={cn('transition-opacity duration-500 opacity-0', 'animate-fadeIn opacity-100 text-black')}>
               {lastMessage}
             </p>
 
