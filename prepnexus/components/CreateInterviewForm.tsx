@@ -40,7 +40,7 @@ const CreateInterview = ({ userId }: { userId: string }) => {
     console.log("Sending payload:", payload);
 
     try {
-      const response = await fetch("http://localhost:3000/api/vapi/generate", {
+      const response = await fetch("/api/vapi/generate", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
