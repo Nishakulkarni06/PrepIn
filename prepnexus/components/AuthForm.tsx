@@ -136,15 +136,16 @@ const AuthForm = ({ type }: { type: FormType }) => {
           </form>
         </Form>
 
-        <div className="text-center mt-6 text-sm">
-          {isSignIn ? "New to PrepIn?" : "Already have an account?"}
-          <Link
-            href={!isSignIn ? "/sign-in" : "/sign-up"}
-            className="text-[#0a66c2] font-semibold ml-1 hover:underline"
-          >
-            {!isSignIn ? "Sign In" : "Sign Up"}
-          </Link>
-        </div>
+        <div className="text-center mt-6 text-sm text-black">
+  {isSignIn ? "New to PrepIn?" : "Already have an account?"}
+  <Link
+    href={!isSignIn ? "/sign-in" : "/sign-up"}
+    className="text-[#0a66c2] font-semibold ml-1 hover:underline"
+  >
+    {!isSignIn ? "Sign In" : "Sign Up"}
+  </Link>
+</div>
+
       </div>
     </div>
   );
