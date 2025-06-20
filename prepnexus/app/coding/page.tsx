@@ -73,15 +73,17 @@ export default function CodingPage() {
           const result = safeEval(testCase.nums, testCase.target);
           // results += Test case: nums=${JSON.stringify(testCase.nums)}, target=${testCase.target}\n;
           results += `Test case: nums=${JSON.stringify(testCase.nums)}, target=${testCase.target}\n`;
-          results += Result: ${JSON.stringify(result)}\n\n;
+          // results += Result: ${JSON.stringify(result)}\n\n;
+          results += `Result: ${JSON.stringify(result)}\n\n`;
         } catch (error) {
-          results += Error in test case: ${error}\n\n;
+          // results += Error in test case: ${error}\n\n;
+          results += `Error in test case: ${error}\n\n`;
         }
       }
 
       setOutput(results);
     } catch (error) {
-      setOutput(Error: ${error}\n);
+      setOutput(`Error: ${error}\n`);
     } finally {
       setIsRunning(false);
     }
