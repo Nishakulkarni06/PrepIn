@@ -97,3 +97,55 @@ interface InterviewFormProps {
 interface TechIconProps {
   techStack: string[];
 }
+
+// New types for coding functionality
+interface CodingProblem {
+  title: string;
+  description: string;
+  example: string;
+  constraints: string[];
+  starterCode: {
+    javascript: string;
+    python: string;
+    java: string;
+    cpp: string;
+  };
+  functionName: {
+    javascript: string;
+    python: string;
+    java: string;
+    cpp: string;
+  };
+  argNames: string[];
+  argTypes: string[];
+  testCases: Array<{
+    input: (string | number | boolean)[];
+    expected: string | number | boolean | (string | number)[];
+    description: string;
+  }>;
+}
+
+interface TestResult {
+  description: string;
+  input: (string | number | boolean)[];
+  expected: string | number | boolean | (string | number)[];
+  actual: string | number | boolean | (string | number)[] | null;
+  passed: boolean;
+  error?: string;
+}
+
+interface CodingSession {
+  interviewId: string;
+  problemIndex: number;
+  code: string;
+  testResults: TestResult[];
+  completed: boolean;
+  timestamp: string;
+}
+
+interface CodingPadProps {
+  interviewId: string;
+  problemIndex?: number;
+  onComplete?: (results: TestResult[]) => void;
+  onNext?: () => void;
+}
