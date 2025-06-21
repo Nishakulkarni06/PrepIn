@@ -1,128 +1,125 @@
 'use client';
 
 import React, { useState } from 'react';
+import { changePassword, deleteAccount, logout } from '@/firebase/client';
+import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
-import { ChevronRightIcon } from '@heroicons/react/20/solid';
-import { ChevronDownIcon } from '@heroicons/react/24/solid';
-
-
-
-
 
 export default function AccountPage() {
   const [showPasswordInput, setShowPasswordInput] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-
+  const [deletePassword, setDeletePassword] = useState('');
+  const [isDeleting, setIsDeleting] = useState(false);
   const router = useRouter();
 
-  // Handlers
-  const handlePasswordUpdate = () => {
-    setShowPasswordInput((prev) => !prev);
+  // ✅ Handle password change with re-auth
+  const handlePasswordChange = async () => {
+    if (!currentPassword || !newPassword) {
+      toast.error('Enter current and new password');
+      return;
+    }
+
+    const result = await changePassword(currentPassword, newPassword);
+    if (result.success) {
+      toast.success('Password updated successfully');
+      setShowPasswordInput(false);
+      setCurrentPassword('');
+      setNewPassword('');
+    } else {
+      toast.error(result.message || 'Failed to update password');
+    }
   };
 
-  const handleConfirmPassword = () => {
-    alert('✅ Password successfully changed!');
-    setShowPasswordInput(false);
-    setNewPassword('');
-  };
+  // ✅ Handle account deletion with re-auth
+  const handleDeleteAccount = async () => {
+    const confirmDelete = window.confirm("Are you sure you want to delete your account? This action cannot be undone.");
+    if (!confirmDelete || !deletePassword) return;
 
-    const handleDeleteConfirm = () => {
+    setIsDeleting(true);
+    const result = await deleteAccount(deletePassword);
 
-    alert('🗑️ Account deleted successfully!');
-    router.push('/home');
-  };
+    if (result.success) {
+      toast.success('Account deleted successfully');
+      await logout();
+      router.push('/sign-in');
+    } else {
+      toast.error(result.message || 'Failed to delete account');
+    }
 
-  const handleCancel = () => {
-    setShowDeleteConfirm(false);
+    setIsDeleting(false);
   };
 
   return (
-    <div className="flex flex-col gap-6 p-4 bg-[#F4F0EB]">
-      
-      {/* Account Settings Header */}
-      <div className="bg-white p-3 rounded-lg shadow-md font-medium text-gray-700">
-        Account settings
-      </div>
+    <div className="p-6 bg-white rounded-md shadow-md max-w-xl mx-auto mt-10">
+      <h1 className="text-2xl font-semibold text-gray-800 mb-4">Account Settings</h1>
 
-      {/* Change Password */}
-      <div className="bg-white p-4 rounded-lg shadow-md flex flex-col gap-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            {showPasswordInput ? (
-    <ChevronDownIcon className="w-5 h-5 text-black" />
-  ) : (
-    <ChevronRightIcon className="w-5 h-5 text-black" />
-  )}
-            <span className="font-medium text-black">change password</span>
-          </div>
+      {/* Password Section */}
+      <div className="mb-6">
+        <h2 className="text-lg font-medium text-gray-700">Change Password</h2>
+        {!showPasswordInput ? (
           <button
-            onClick={handlePasswordUpdate}
-            className="bg-blue-600 text-white text-sm px-3 py-1 rounded-full hover:bg-blue-700"
+            onClick={() => setShowPasswordInput(true)}
+            className="mt-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
           >
-            update
+            Change Password
           </button>
-        </div>
-
-        {showPasswordInput && (
-          <div className="flex flex-col items-center gap-2 mt-2">
-            <p className="text-black text-sm text-center">enter a new password.</p>
+        ) : (
+          <div className="mt-3 space-y-2">
             <input
               type="password"
-              placeholder="enter new password"
+              placeholder="Current password"
+              value={currentPassword}
+              onChange={(e) => setCurrentPassword(e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 rounded text-black"
+            />
+            <input
+              type="password"
+              placeholder="New password"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
-              className="border-b border-black bg-transparent text-center outline-none"
+              className="w-full px-4 py-2 border border-gray-300 rounded text-black"
             />
-            <button
-              onClick={handleConfirmPassword}
-              className="bg-green-400 text-white text-sm px-4 py-1 rounded-full hover:bg-green-500"
-            >
-              confirm
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={handlePasswordChange}
+                className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+              >
+                Save
+              </button>
+              <button
+                onClick={() => {
+                  setShowPasswordInput(false);
+                  setCurrentPassword('');
+                  setNewPassword('');
+                }}
+                className="px-4 py-2 bg-gray-300 text-black rounded hover:bg-gray-400"
+              >
+                Cancel
+              </button>
+            </div>
           </div>
         )}
       </div>
 
-      {/* Delete Account */}
-       <div className="bg-white p-4 rounded-lg shadow-md flex flex-col gap-3">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          {showDeleteConfirm ? (
-    <ChevronDownIcon className="w-5 h-5 text-black" />
-  ) : (
-    <ChevronRightIcon className="w-5 h-5 text-black" />
-  )}
-          <span className="font-medium text-black">Delete Account</span>
-        </div>
+      {/* Delete Account Section */}
+      <div>
+        <h2 className="text-lg font-medium text-gray-700">Danger Zone</h2>
+        <input
+          type="password"
+          placeholder="Enter current password to confirm"
+          value={deletePassword}
+          onChange={(e) => setDeletePassword(e.target.value)}
+          className="w-full mt-2 px-4 py-2 border border-gray-300 rounded text-black"
+        />
         <button
-          onClick={() => setShowDeleteConfirm(true)}
-          className="bg-red-600 text-white text-sm px-3 py-1 rounded-full hover:bg-red-700"
+          onClick={handleDeleteAccount}
+          className="mt-2 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50"
+          disabled={isDeleting}
         >
-          Delete
+          {isDeleting ? 'Deleting...' : 'Delete Account'}
         </button>
       </div>
-
-      {showDeleteConfirm && (
-        <div className="flex flex-col items-center gap-2 mt-2">
-          <p className="text-red-700 text-sm text-center">Are you sure you want to delete this account?</p>
-          <div className="flex gap-4">
-            <button
-              onClick={handleDeleteConfirm}
-              className="bg-red-600 text-white text-sm px-4 py-1 rounded-full hover:bg-red-700"
-            >
-              Yes
-            </button>
-            <button
-              onClick={handleCancel}
-              className="bg-gray-200 text-black text-sm px-4 py-1 rounded-full hover:bg-gray-300"
-            >
-              No
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
     </div>
   );
 }

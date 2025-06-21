@@ -1,48 +1,76 @@
-// // Import the functions you need from the SDKs you need
-// import { initializeApp } from "firebase/app";
-// import { getAnalytics } from "firebase/analytics";
-// // TODO: Add SDKs for Firebase products that you want to use
-// // https://firebase.google.com/docs/web/setup#available-libraries
-
-// // Your web app's Firebase configuration
-// // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-// const firebaseConfig = {
-//   apiKey: "AIzaSyCLPunRqpIWPbq4bt7S0e4JO_l6d6uGTdo",
-//   authDomain: "prepnexus-b89b9.firebaseapp.com",
-//   projectId: "prepnexus-b89b9",
-//   storageBucket: "prepnexus-b89b9.firebasestorage.app",
-//   messagingSenderId: "945930702757",
-//   appId: "1:945930702757:web:163ca9049603ade3f4a24c",
-//   measurementId: "G-4MLV66J1W6"
-// };
-
-// // Initialize Firebase
-// const app = initializeApp(firebaseConfig);
-// const analytics = getAnalytics(app);
-
-// Import the functions you need from the SDKs you need
 import { getApp, getApps, initializeApp } from "firebase/app";
-// import { getAnalytics } from "firebase/analytics";
-import { getAuth } from "firebase/auth";
+import {
+  getAuth,
+  updatePassword,
+  deleteUser,
+  signOut,
+  EmailAuthProvider,
+  reauthenticateWithCredential,
+} from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
 
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+// ✅ Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyBAbW7x_phtbAG83dH7JROAF-x-hwjvIJQ",
   authDomain: "prepnexus-b9328.firebaseapp.com",
   projectId: "prepnexus-b9328",
-  storageBucket: "prepnexus-b9328.firebasestorage.app",
+  storageBucket: "prepnexus-b9328.appspot.com",
   messagingSenderId: "905643568779",
   appId: "1:905643568779:web:9aa9d37eb1f39716a8ee8e",
   measurementId: "G-YVQFD0QLDX"
 };
 
-// Initialize Firebase
-const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
-// const analytics = getAnalytics(app);
+// ✅ Initialize Firebase
+export const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 
+// ✅ Firebase services
 export const auth = getAuth(app);
 export const db = getFirestore(app);
+
+// ✅ Change password (with re-authentication)
+export async function changePassword(currentPassword: string, newPassword: string) {
+  const user = auth.currentUser;
+
+  if (!user || !user.email) {
+    return { success: false, message: "No user is logged in." };
+  }
+
+  try {
+    const credential = EmailAuthProvider.credential(user.email, currentPassword);
+    await reauthenticateWithCredential(user, credential);
+    await updatePassword(user, newPassword);
+    return { success: true };
+  } catch (error: any) {
+    console.error("Password update error:", error);
+    return { success: false, message: error.message };
+  }
+}
+
+// ✅ Delete account (with re-authentication)
+export async function deleteAccount(currentPassword: string) {
+  const user = auth.currentUser;
+
+  if (!user || !user.email) {
+    return { success: false, message: "No user is logged in." };
+  }
+
+  try {
+    const credential = EmailAuthProvider.credential(user.email, currentPassword);
+    await reauthenticateWithCredential(user, credential);
+    await deleteUser(user);
+    return { success: true };
+  } catch (error: any) {
+    console.error("Account deletion failed:", error);
+    return { success: false, message: error.message };
+  }
+}
+
+// ✅ Logout
+export async function logout() {
+  try {
+    await signOut(auth);
+    console.log("Logged out successfully");
+  } catch (error) {
+    console.error("Logout failed:", error);
+  }
+}

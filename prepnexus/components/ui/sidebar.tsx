@@ -30,10 +30,6 @@ export default function ProfileSidebar() {
             {item.name}
           </Link>
         ))}
-
-        <button className="text-red-600 flex items-center gap-1 px-4 py-2 hover:bg-red-100 rounded-md w-full text-sm">
-          <span>🚫</span> Log Out
-        </button>
       </div>
     </aside>
   );

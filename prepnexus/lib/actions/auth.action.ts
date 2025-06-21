@@ -131,3 +131,26 @@ export async function isAuthenticated() {
   const user = await getCurrentUser();
   return !!user;
 }
+export async function updateUserProfile(data: {
+  name: string;
+  email: string;
+  profileURL?: string;
+}) {
+  try {
+    const user = await getCurrentUser();
+    if (!user?.id) return false;
+    await db.collection("users").doc(user.id).update({
+      name: data.name,
+      email: data.email,
+      ...(data.profileURL && { profileURL: data.profileURL }),
+      updatedAt: new Date().toISOString(),
+    });
+    
+    
+
+    return true;
+  } catch (error) {
+    console.error("Error updating user profile:", error);
+    return false;
+  }
+}
