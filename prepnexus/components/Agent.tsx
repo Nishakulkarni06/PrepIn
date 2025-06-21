@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { cn } from "@/lib/utils";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { vapi } from "@/lib/vapi.sdk";
 import { useRouter } from 'next/navigation';
 import { interviewer } from "@/constants";
@@ -15,36 +15,40 @@ enum CallStatus {
   FINISHED = 'FINISHED',
 }
 
-interface SavedMessage{
-  role: 'user' |'system' | 'assistant';
+interface SavedMessage {
+  role: 'user' | 'system' | 'assistant';
   content: string;
 }
-const Agent=({
+
+const Agent = ({
   userName,
   userId,
   interviewId,
   feedbackId,
   type,
-  questions}: AgentProps) => {
+  questions,
+}: AgentProps) => {
   const router = useRouter();
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const recordedChunks = useRef<Blob[]>([]);
+
+  
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [callStatus, setCallStatus] = useState<CallStatus>(CallStatus.INACTIVE);
   const [messages, setMessages] = useState<SavedMessage[]>([]);
   const [lastMessage, setLastMessage] = useState<string>("");
-  // const latestMessage = messages[messages.length - 1]?.content;
-  // const isCallInactiveOrFinished = callStatus === CallStatus.INACTIVE || callStatus === CallStatus.FINISHED;
 
   useEffect(() => {
     const onCallStart = () => setCallStatus(CallStatus.ACTIVE);
     const onCallEnd = () => setCallStatus(CallStatus.FINISHED);
 
-    const onMessage = (message: Message) =>  {
-      if(message.type === 'transcript' && message.transcriptType === 'final') {
+    const onMessage = (message: Message) => {
+      if (message.type === 'transcript' && message.transcriptType === 'final') {
         const newMessage = { role: message.role, content: message.transcript };
-
         setMessages((prev) => [...prev, newMessage]);
       }
-    }
+    };
 
     const onSpeechStart = () => setIsSpeaking(true);
     const onSpeechEnd = () => setIsSpeaking(false);
@@ -65,28 +69,40 @@ const Agent=({
       vapi.off('speech-start', onSpeechStart);
       vapi.off('speech-end', onSpeechEnd);
       vapi.off('error', onError);
-    }
-  },[])
+    };
+  }, []);
 
   useEffect(() => {
-      if (messages.length > 0) {
+    const startVideo = async () => {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true,audio:true });
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+        }
+      } catch (err) {
+        console.error("Error accessing webcam:", err);
+      }
+    };
+
+    startVideo();
+  }, []);
+
+  useEffect(() => {
+    if (messages.length > 0) {
       setLastMessage(messages[messages.length - 1].content);
     }
 
     const handleGenerateFeedback = async (messages: SavedMessage[]) => {
-      console.log("handleGenerateFeedback");
-
-     const { success, feedbackId: id } = await createFeedback({
+      const { success, feedbackId: id } = await createFeedback({
         interviewId: interviewId!,
         userId: userId!,
         transcript: messages,
         feedbackId,
       });
-      
-        if (success && id) {
+
+      if (success && id) {
         router.push(`/interview/${interviewId}/feedback`);
       } else {
-        console.log("Error saving feedback");
         router.push("/");
       }
     };
@@ -103,6 +119,7 @@ const Agent=({
   const handleCall = async () => {
     setCallStatus(CallStatus.CONNECTING);
 
+    // Start VAPI Call
     if (type === "generate") {
       await vapi.start(
         undefined,
@@ -119,73 +136,106 @@ const Agent=({
     } else {
       let formattedQuestions = "";
       if (questions) {
-        formattedQuestions = questions
-          .map((question) => `- ${question}`)
-          .join("\n");
+        formattedQuestions = questions.map((q) => `- ${q}`).join("\n");
       }
 
       await vapi.start(interviewer, {
         variableValues: {
           questions: formattedQuestions,
         },
-        
       });
     }
+
+    // Start media recording
+    const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+    if (videoRef.current) {
+      videoRef.current.srcObject = stream;
+    }
+
+    const mediaRecorder = new MediaRecorder(stream, {
+      mimeType: "video/webm; codecs=vp8,opus",
+    });
+
+    mediaRecorder.ondataavailable = (event) => {
+      if (event.data.size > 0) {
+        recordedChunks.current.push(event.data);
+      }
+    };
+
+    mediaRecorderRef.current = mediaRecorder;
+    mediaRecorder.start();
   };
+
   const handleDisconnect = async () => {
     setCallStatus(CallStatus.FINISHED);
     vapi.stop();
-  }
-  
 
-  return(
+    if (mediaRecorderRef.current) {
+      mediaRecorderRef.current.stop();
+      mediaRecorderRef.current.onstop = () => {
+        const blob = new Blob(recordedChunks.current, { type: "video/webm" });
+        const url = URL.createObjectURL(blob);
+
+        // Trigger download
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "interview-recording.webm";
+        a.click();
+        URL.revokeObjectURL(url);
+      };
+    }
+  };
+
+  return (
     <>
-    <div className="call-view">
-      <div className="card-interviewer bg-dark-200 rounded-sm">
-        <div className="avatar">
-           <Image src="/ai-avatar.png" alt="vapi" width={65} height={54} className="object-cover" />
-           {isSpeaking && <span className="animate-speak"/>}
+      <div className="call-view">
+        <div className="card-interviewer bg-dark-200 rounded-sm">
+          <div className="avatar">
+            <Image src="/ai-avatar.png" alt="vapi" width={65} height={54} className="object-cover" />
+            {isSpeaking && <span className="animate-speak" />}
+          </div>
+          <h3 className="text-white">AI Interviewer</h3>
         </div>
-        <h3 className="text-white">AI Interviewer</h3>
-      </div>
-      <div className="card-border rounded-sm">
-        <div className="card-content">
-          <Image src="/user-avatar.png" alt="user avatar" width={540} height={540} className="rounded-full object-cover size-[120px]" />
-           <h3 className="text-white">{userName}</h3>
-        </div> 
 
+        <div className="card-border rounded-sm">
+          <div className="card-content">
+            <video
+              ref={videoRef}
+              autoPlay
+              muted
+              className="rounded-full object-cover size-[280px]"
+            />
+            <h3 className="text-white">{userName}</h3>
+          </div>
+        </div>
       </div>
-    </div>
-      {messages.length>0 && (
+
+      {messages.length > 0 && (
         <div className="transcript-border">
           <div className="transcript">
             <p key={lastMessage} className={cn('transition-opacity duration-500 opacity-0', 'animate-fadeIn opacity-100 text-black')}>
               {lastMessage}
             </p>
-
           </div>
         </div>
       )}
-    <div className="w-full flex justify-center">
-      {callStatus !== 'ACTIVE'?(
-        <button className="relative btn-call" onClick={() => handleCall()}>
-          <span className={cn('absolute animate-ping rounded-full opacity-75', callStatus !== 'CONNECTING' && 'hidden')}
-             />
-            <span className="relative">
-              {callStatus === "INACTIVE" || callStatus === "FINISHED"
-                ? "Call"
-                : ". . ."}
-            </span>
-        </button>
-      ):(
-        <button className="btn-disconnect" onClick={() => handleDisconnect()}>
-          End
-        </button>
-      )}
 
-    </div>
-    
+      <div className="w-full flex justify-center">
+        {callStatus !== 'ACTIVE' ? (
+          <button className="relative btn-call" onClick={handleCall}>
+            <span className={cn('absolute animate-ping rounded-full opacity-75', callStatus !== 'CONNECTING' && 'hidden')} />
+            <span className="relative">
+              {callStatus === "INACTIVE" || callStatus === "FINISHED" ? "Call" : ". . ."}
+            </span>
+          </button>
+        ) : (
+          <button className="btn-disconnect" onClick={handleDisconnect}>
+            End
+          </button>
+        )}
+      </div>
     </>
-  )
-}
+  );
+};
+
 export default Agent;

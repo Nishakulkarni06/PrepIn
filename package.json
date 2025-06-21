@@ -1,8 +1,17 @@
 {
+  "name": "prep-nexus",
+  "version": "1.0.0",
   "dependencies": {
+    "@monaco-editor/react": "^4.4.6",
     "@ai-sdk/google": "^1.2.19",
     "ai": "^4.3.16",
     "firebase": "^11.9.0",
     "firebase-admin": "^13.4.0"
+  },
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "vercel-build": "npm install && npm run build"
   }
 }
