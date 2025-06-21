@@ -6,8 +6,8 @@ import dynamic from 'next/dynamic';
 import { Button } from '@/components/ui/button';
 import { getInterviewById } from '@/lib/actions/general.action';
 import { saveCodingSession } from '@/lib/actions/coding.action';
-// import { DSAFeedback } from '@/components/DSAFeedback';
-import { DSAFeedback } from '../../../../components/DSAFeedback';
+import { DSAFeedback } from '@/components/DSAFeedback';
+// import { DSAFeedback } from '../../../../components/DSAFeedback';
 
 // Dynamically import Monaco editor to avoid SSR issues
 const Editor = dynamic(
