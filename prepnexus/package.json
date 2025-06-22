@@ -9,10 +9,10 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@monaco-editor/react": "^4.4.6",
     "@ai-sdk/google": "^1.2.19",
     "@heroicons/react": "^2.2.0",
     "@hookform/resolvers": "^5.0.1",
+    "@monaco-editor/react": "^4.7.0",
     "@radix-ui/react-label": "^2.1.7",
     "@radix-ui/react-slot": "^1.2.3",
     "@vapi-ai/web": "^2.3.5",

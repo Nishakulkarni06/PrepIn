@@ -247,11 +247,11 @@ export default function CodingPage() {
 
       {/* Language Selector */}
       <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-md">
-        <label className="block text-sm font-medium mb-2">Programming Language:</label>
+        <label className="block text-sm font-medium mb-2 ">Programming Language:</label>
         <select 
           value={language} 
           onChange={(e) => setLanguage(e.target.value)}
-          className="w-full p-2 border border-gray-300 rounded-md"
+          className="w-full p-2 border border-gray-300 rounded-md bg-white text-black"
         >
           <option value="javascript">JavaScript</option>
           <option value="python">Python</option>
