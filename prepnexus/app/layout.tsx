@@ -7,7 +7,13 @@ const monaSans = Mona_Sans({
   variable: "--font-mona-sans",
   subsets: ["latin"],
 });
-
+export const metadata = {
+  title: "PrepIn",
+  description: "AI-powered interview preparation platform",
+  icons: {
+    icon: "/favicon.ico", // This will use the one from /public
+  },
+};
 export default function RootLayout({
   children,
 }: Readonly<{
